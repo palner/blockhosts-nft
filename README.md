@@ -1,10 +1,10 @@
 # Blockhosts
 
-Log parser / blocker using Golang and IPtables.
+Log parser / blocker using Golang and nftables.
 
 ## Installing
 
-1. Make sure you have iptables installed on your system
+1. Make sure you have nftables installed on your system
 2. Download the binary to `/usr/local/bin/`
 3. Download the config to `/usr/local/bin/`
 4. Update hosts.deny
@@ -12,7 +12,7 @@ Log parser / blocker using Golang and IPtables.
 
 You can also do the Super Lazy install of:
 
-`curl -sSL https://raw.githubusercontent.com/palner/blockhosts/refs/heads/main/install_blockhosts.sh | bash`
+`curl -sSL https://raw.githubusercontent.com/palner/blockhosts-nft/refs/heads/main/install_blockhosts.sh | bash`
 
 _If you do the super lazy install, please check the `/etc/hosts.deny` for accuracy as well as adding your IP to `/usr/local/bin/bhconfig.json`._
 
@@ -22,15 +22,15 @@ _If you do the super lazy install, please check the `/etc/hosts.deny` for accura
 
 ```
 cd /usr/local/bin
-wget https://github.com/palner/blockhosts/raw/refs/heads/main/binary/blockhosts
-chmod +x blockhosts
+wget https://github.com/palner/blockhosts-nft/raw/refs/heads/main/binary/blockhosts-nft
+chmod +x blockhosts-nft
 ```
 
 ### Download the config
 
 ```
 cd /usr/local/bin
-wget https://raw.githubusercontent.com/palner/blockhosts/refs/heads/main/bhconfig.json
+wget https://raw.githubusercontent.com/palner/blockhosts-nft/refs/heads/main/bhconfig.json
 ```
 
 #### Update the config
@@ -64,7 +64,7 @@ Examples:
 #		by the '/usr/sbin/tcpd' server.
 #
 
-sshd : ALL : spawn (/usr/local/bin/blockhosts) : allow
+sshd : ALL : spawn (/usr/local/bin/blockhosts-nft) : allow
 sshd : ALL : allow
 ```
 
@@ -77,22 +77,21 @@ sshd : ALL : allow
 #		by the '/usr/sbin/tcpd' server.
 #
 
-sshd : ALL : spawn (/usr/local/bin/blockhosts -ssh=/var/log/secure) : allow
+sshd : ALL : spawn (/usr/local/bin/blockhosts-nft -ssh=/var/log/secure) : allow
 sshd : ALL : allow
 ```
 
 ## Other Flags
 
 - `ssh`: log file to parse
-- `target`: iptables action (default is `DROP`)
-- `chain`: iptables chain name (default is `APIBANLOCAL`) (Note: will be created if it doesn't exist)
+- `set`: nftables set name (default is `APIBANLOCAL`) (Note: will be created if it doesn't exist)
 - `log`: log file for output (default is /var/log/blockhosts.log)
 - `xtra`: `true|false`. default false. Used for extra logging
 - `full`: `true|false`. default false. Read full log (vs 5000 line chunks)
 
 Example:
 
-`/usr/local/bin/blockhosts -ssh=/var/log/secure -xtra=true -chain=SSHCHAIN -target=REJECT`
+`/usr/local/bin/blockhosts-nft -ssh=/var/log/secure -xtra=true -set=SSHCHAIN`
 
 ## License / Warranty
 
