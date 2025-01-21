@@ -60,7 +60,7 @@ else
 fi
 
 echo "[-] downloading latest blockhosts-nft from github"
-wget https://github.com/palner/blockhosts-nft/raw/refs/heads/main/blockhosts-nft &>/dev/null
+wget https://github.com/palner/blockhosts-nft/raw/refs/heads/main/binary/blockhosts-nft &>/dev/null
 if [ "$?" -eq "0" ]
 then
   echo "[-] downloaded"
