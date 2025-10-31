@@ -460,10 +460,13 @@ func SshAuthCheck(logfile string) ([]string, int, error) {
 func LoadConfig() (*BHconfig, error) {
 	var fileLocations []string
 	var fileName string
+	var altFileName string
 	if useyaml {
 		fileName = "bhconfig.yaml"
+		altFileName = "bhconfig.json"
 	} else {
 		fileName = "bhconfig.json"
+		altFileName = "bhconfig.yaml"
 	}
 
 	// Add standard static locations
@@ -474,6 +477,12 @@ func LoadConfig() (*BHconfig, error) {
 		"/var/lib/blockhosts/"+fileName,
 		"/usr/local/bin/blockhosts/"+fileName,
 		"/usr/local/blockhosts/"+fileName,
+		altFileName,
+		"/usr/local/bin/"+altFileName,
+		"/etc/blockhosts/"+altFileName,
+		"/var/lib/blockhosts/"+altFileName,
+		"/usr/local/bin/blockhosts/"+altFileName,
+		"/usr/local/blockhosts/"+altFileName,
 	)
 
 	for _, loc := range fileLocations {
@@ -499,6 +508,13 @@ func LoadConfig() (*BHconfig, error) {
 		}
 
 		// Store the location of the config file so that we can update it later
+		if useyaml {
+			if loc[len(loc)-4:] == "json" {
+				loc = strings.Replace(loc, ".json", ".yaml", -1)
+				log.Println("[LoadConfig] will replace json file with", loc)
+			}
+		}
+
 		cfg.sourceFile = loc
 		return cfg, nil
 	}
