@@ -17,9 +17,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 Building:
 
-GOOS=linux GOARCH=amd64 go build -o binary/blockhosts-nft
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o binary/blockhosts-nft
-GOOS=linux GOARCH=arm GOARM=7 go build -o binary/blockhosts-nft-pi
+env GOOS=linux GOARCH=amd64 go build -o binary/blockhosts-nft
+env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o binary/blockhosts-nft
+env GOOS=linux GOARCH=arm GOARM=7 go build -o binary/blockhosts-nft-pi
 
 */
 
@@ -591,13 +591,15 @@ func (cfg *BHconfig) Update() error {
 	})
 
 	if useyaml {
-		yaml.NewEncoder(f)
+		enc := yaml.NewEncoder(f)
+		err = enc.Encode(cfg)
 	} else {
 		enc := json.NewEncoder(f)
 		enc.SetIndent("", "\t")
+		err = enc.Encode(cfg)
 	}
 
-	return nil
+	return err
 }
 
 func BeenAWeek(ts int64) bool {
