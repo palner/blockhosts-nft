@@ -1,8 +1,11 @@
 module blockhosts-nft
 
-go 1.23.5
+go 1.25.3
 
-require github.com/apiban/nftlib v0.4.0
+require (
+	github.com/apiban/nftlib v0.4.0
+	github.com/goccy/go-yaml v1.18.0
+)
 
 require (
 	github.com/tidwall/gjson v1.18.0 // indirect

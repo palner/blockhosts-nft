@@ -1,0 +1,4 @@
+last_line: 0
+allowed:
+- cidr: 192.168.0.0/16
+  comment: default example

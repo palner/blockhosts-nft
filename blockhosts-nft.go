@@ -44,6 +44,7 @@ import (
 	"time"
 
 	"github.com/apiban/nftlib"
+	"github.com/goccy/go-yaml"
 )
 
 type Re map[string]*regexp.Regexp
@@ -54,6 +55,7 @@ var (
 	sshLog   string
 	extraLog bool
 	fullLog  bool
+	useyaml  bool
 	bhc      *BHconfig
 )
 
@@ -86,7 +88,8 @@ type IPAddressesTime struct {
 }
 
 type IPNet struct {
-	Cidr string `json:"cidr"`
+	Cidr    string `json:"cidr"`
+	Comment string `json:"comment,omitempty"`
 }
 
 func init() {
@@ -95,6 +98,7 @@ func init() {
 	flag.StringVar(&sshLog, "ssh", "/var/log/auth.log", "location of ssh log")
 	flag.BoolVar(&extraLog, "xtra", false, "log extra")
 	flag.BoolVar(&fullLog, "full", false, "read more than 5000 lines of the log")
+	flag.BoolVar(&useyaml, "yaml", false, "use yaml - default is json")
 }
 
 func main() {
@@ -162,10 +166,7 @@ func main() {
 
 	var newBlockList []IPAddressesTime
 	var blocked []string
-	for _, ip := range setDetails.Elements {
-		blocked = append(blocked, ip)
-	}
-
+	blocked = append(blocked, setDetails.Elements...)
 	if blocked == nil {
 		log.Println("nothing blocked in", setName, "checking config")
 		if bhc.Blocked == nil {
@@ -303,7 +304,7 @@ func main() {
 				} else {
 					for _, v := range bhc.Allowed {
 						if bhnft.ContainsIP(v.Cidr, val.Ip) {
-							log.Println(val.Ip, "allowed in", v.Cidr, " - not blocking")
+							log.Println(val.Ip, "allowed in", v.Cidr, v.Comment, " - not blocking")
 							allowed = true
 						} else {
 							if !allowed {
@@ -403,11 +404,10 @@ func SshAuthCheck(logfile string) ([]string, int, error) {
 	}
 
 	defer file.Close()
-	reader := bufio.NewReader(file)
 	linecount := 0
 	parsecount := 0
 	var read = false
-	reader = bufio.NewReader(file)
+	reader := bufio.NewReader(file)
 	log.Println("parse log")
 	for {
 		line, err := reader.ReadSlice('\n')
@@ -459,7 +459,12 @@ func SshAuthCheck(logfile string) ([]string, int, error) {
 // LoadConfig attempts to load the configuration file from various locations
 func LoadConfig() (*BHconfig, error) {
 	var fileLocations []string
-	fileName := "bhconfig.json"
+	var fileName string
+	if useyaml {
+		fileName = "bhconfig.yaml"
+	} else {
+		fileName = "bhconfig.json"
+	}
 
 	// Add standard static locations
 	fileLocations = append(fileLocations,
@@ -481,9 +486,16 @@ func LoadConfig() (*BHconfig, error) {
 		log.Println("-> [-] [LoadConfig] trying config located in", loc)
 		defer f.Close()
 		cfg := new(BHconfig)
-		if err := json.NewDecoder(f).Decode(cfg); err != nil {
-			log.Println("-> [x] [LoadConfig] error reading:", loc, err)
-			return nil, fmt.Errorf("[LoadConfig] failed to read configuration from %s: %w", loc, err)
+		if useyaml {
+			if err := yaml.NewDecoder(f).Decode(cfg); err != nil {
+				log.Println("-> [x] [LoadConfig] error reading:", loc, err)
+				return nil, fmt.Errorf("[LoadConfig] failed to read configuration from %s: %w", loc, err)
+			}
+		} else {
+			if err := json.NewDecoder(f).Decode(cfg); err != nil {
+				log.Println("-> [x] [LoadConfig] error reading:", loc, err)
+				return nil, fmt.Errorf("[LoadConfig] failed to read configuration from %s: %w", loc, err)
+			}
 		}
 
 		// Store the location of the config file so that we can update it later
@@ -578,9 +590,14 @@ func (cfg *BHconfig) Update() error {
 		return bhc.Watching[i].TimeStamp < bhc.Watching[j].TimeStamp
 	})
 
-	enc := json.NewEncoder(f)
-	enc.SetIndent("", "\t")
-	return enc.Encode(cfg)
+	if useyaml {
+		yaml.NewEncoder(f)
+	} else {
+		enc := json.NewEncoder(f)
+		enc.SetIndent("", "\t")
+	}
+
+	return nil
 }
 
 func BeenAWeek(ts int64) bool {
@@ -588,11 +605,7 @@ func BeenAWeek(ts int64) bool {
 	timeNow := time.Now()
 	oneWeekAgo := timeNow.AddDate(0, 0, -7)
 
-	if checkTime.Before(oneWeekAgo) {
-		return true
-	}
-
-	return false
+	return checkTime.Before(oneWeekAgo)
 
 }
 
