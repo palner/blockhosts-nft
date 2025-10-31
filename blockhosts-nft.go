@@ -592,14 +592,14 @@ func (cfg *BHconfig) Update() error {
 
 	if useyaml {
 		enc := yaml.NewEncoder(f)
-		err = enc.Encode(cfg)
+		enc.Encode(cfg)
 	} else {
 		enc := json.NewEncoder(f)
 		enc.SetIndent("", "\t")
-		err = enc.Encode(cfg)
+		enc.Encode(cfg)
 	}
 
-	return err
+	return nil
 }
 
 func BeenAWeek(ts int64) bool {
