@@ -494,8 +494,9 @@ func LoadConfig() (*BHconfig, error) {
 
 		log.Println("-> [-] [LoadConfig] trying config located in", loc)
 		defer f.Close()
+		fileExt := loc[len(loc)-4:]
 		cfg := new(BHconfig)
-		if useyaml {
+		if fileExt == "yaml" {
 			if err := yaml.NewDecoder(f).Decode(cfg); err != nil {
 				log.Println("-> [x] [LoadConfig] error reading:", loc, err)
 				return nil, fmt.Errorf("[LoadConfig] failed to read configuration from %s: %w", loc, err)
@@ -509,7 +510,7 @@ func LoadConfig() (*BHconfig, error) {
 
 		// Store the location of the config file so that we can update it later
 		if useyaml {
-			if loc[len(loc)-4:] == "json" {
+			if fileExt == "json" {
 				loc = strings.Replace(loc, ".json", ".yaml", -1)
 				log.Println("[LoadConfig] will replace json file with", loc)
 			}
