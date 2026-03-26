@@ -45,6 +45,7 @@ import (
 
 	"github.com/apiban/nftlib"
 	"github.com/goccy/go-yaml"
+	"github.com/gofrs/flock"
 )
 
 type Re map[string]*regexp.Regexp
@@ -599,21 +600,32 @@ func (cfg *BHconfig) Update() error {
 
 	defer f.Close()
 
-	sort.Slice(bhc.Blocked, func(i, j int) bool {
-		return bhc.Blocked[i].TimeStamp < bhc.Blocked[j].TimeStamp
-	})
+	fileLock := flock.New(cfg.sourceFile)
+	locked, err := fileLock.TryLock()
 
-	sort.Slice(bhc.Watching, func(i, j int) bool {
-		return bhc.Watching[i].TimeStamp < bhc.Watching[j].TimeStamp
-	})
+	if err != nil {
+		log.Println("[updateconfig] error:", err.Error())
+	}
 
-	if useyaml {
-		enc := yaml.NewEncoder(f)
-		enc.Encode(cfg)
+	if locked {
+		sort.Slice(bhc.Blocked, func(i, j int) bool {
+			return bhc.Blocked[i].TimeStamp < bhc.Blocked[j].TimeStamp
+		})
+
+		sort.Slice(bhc.Watching, func(i, j int) bool {
+			return bhc.Watching[i].TimeStamp < bhc.Watching[j].TimeStamp
+		})
+
+		if useyaml {
+			enc := yaml.NewEncoder(f)
+			enc.Encode(cfg)
+		} else {
+			enc := json.NewEncoder(f)
+			enc.SetIndent("", "\t")
+			enc.Encode(cfg)
+		}
 	} else {
-		enc := json.NewEncoder(f)
-		enc.SetIndent("", "\t")
-		enc.Encode(cfg)
+		log.Println("[updateconfig] unable to update", cfg.sourceFile, "... aleady locked?")
 	}
 
 	return nil
