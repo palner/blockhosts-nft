@@ -10,7 +10,7 @@ The most recent tagged version of blockhosts-nft is supported.
 
 ## Reporting a Vulnerability
 
-If you believe there's a security vulnerability, please don't use the public forums. Please click the **Report a Vulnerability** button above.
+If you believe there's a security vulnerability, please don't use the public forums. Please click the [**Report a Vulnerability**](https://github.com/palner/blockhosts-nft/security/advisories/new) button above.
 
 - When the report is submitted, GitHub automatically adds the reporter of the vulnerability as a collaborator and as a credited user on the proposed advisory.
 - Optionally, click **Start a temporary private fork** if you want to start to fix the issue.
