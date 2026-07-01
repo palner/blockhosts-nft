@@ -1,7 +1,7 @@
 /*
 
 blockhosts-nft: blocks attack detections via nftables
-Copyright (C) 2025 Fred Posner
+Copyright (C) 2025, 2026 Fred Posner (The Palner Group, Inc.)
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -65,7 +65,7 @@ type BHconfig struct {
 	Allowed      []IPNet
 	Blocked      []IPAddressesTime
 	Watching     []IPAddressesCountTime
-	sourceFile   string
+	SourceFile   string
 }
 
 type IPAddressesCount struct {
@@ -517,7 +517,7 @@ func LoadConfig() (*BHconfig, error) {
 			}
 		}
 
-		cfg.sourceFile = loc
+		cfg.SourceFile = loc
 		return cfg, nil
 	}
 
@@ -593,14 +593,7 @@ func GetElapsed(start time.Time) time.Duration {
 }
 
 func (cfg *BHconfig) Update() error {
-	f, err := os.Create(cfg.sourceFile)
-	if err != nil {
-		return fmt.Errorf("failed to open configuration file for writing: %w", err)
-	}
-
-	defer f.Close()
-
-	fileLock := flock.New(cfg.sourceFile)
+	fileLock := flock.New(cfg.SourceFile)
 	locked, err := fileLock.TryLock()
 
 	if err != nil {
@@ -608,6 +601,13 @@ func (cfg *BHconfig) Update() error {
 	}
 
 	if locked {
+		f, err := os.Create(cfg.SourceFile)
+		if err != nil {
+			return fmt.Errorf("failed to open configuration file for writing: %w", err)
+		}
+
+		defer f.Close()
+
 		sort.Slice(bhc.Blocked, func(i, j int) bool {
 			return bhc.Blocked[i].TimeStamp < bhc.Blocked[j].TimeStamp
 		})
@@ -625,7 +625,7 @@ func (cfg *BHconfig) Update() error {
 			enc.Encode(cfg)
 		}
 	} else {
-		log.Println("[updateconfig] unable to update", cfg.sourceFile, "... aleady locked?")
+		log.Println("[updateconfig] unable to update", cfg.SourceFile, "... aleady locked?")
 	}
 
 	return nil
