@@ -616,7 +616,7 @@ func (cfg *BHconfig) Update() error {
 		})
 
 		if useyaml {
-			enc := yaml.NewEncoder(f)
+			enc := yaml.NewEncoder(f, yaml.Indent(2), yaml.IndentSequence(true))
 			enc.Encode(cfg)
 		} else {
 			enc := json.NewEncoder(f)
