@@ -119,7 +119,7 @@ func main() {
 		log.SetOutput(lf)
 	}
 
-	log.Print("** blockhosts-nft Copyright (C) 2025, Fred Posner (pgpx.io)")
+	log.Print("** blockhosts-nft Copyright (C) 2026 Fred Posner (pgpx.io)")
 	log.Print("** This program comes with ABSOLUTELY NO WARRANTY.")
 	log.Print("** License: GPLv3 https://github.com/palner/blockhosts-nft")
 	log.Println("-> [o] Loading config")
@@ -172,7 +172,7 @@ func main() {
 		if bhc.Blocked == nil {
 			log.Println("no blocks listed in cfg either")
 		} else {
-			log.Println("sync cfg blocks to iptables")
+			log.Println("sync cfg blocks to nftables")
 			for _, v := range bhc.Blocked {
 				if !bhnft.BeenAWeek(v.TimeStamp) {
 					_ = nftlib.NftAddSetElement(setDetails, v.Ip)
@@ -214,7 +214,7 @@ func main() {
 			for _, v := range bhc.Blocked {
 				if bhnft.BeenAWeek(v.TimeStamp) {
 					if bhnft.Contains(blocked, v.Ip) {
-						log.Println("removing week old ip", v.Ip, "from iptables")
+						log.Println("removing week old ip", v.Ip, "from nftables")
 						_ = nftlib.NftDelSetElement(setDetails, v.Ip)
 					}
 				} else {
