@@ -99,7 +99,7 @@ func init() {
 	flag.StringVar(&sshLog, "ssh", "/var/log/auth.log", "location of ssh log")
 	flag.BoolVar(&extraLog, "xtra", false, "log extra")
 	flag.BoolVar(&fullLog, "full", false, "read more than 5000 lines of the log")
-	flag.BoolVar(&useyaml, "yaml", false, "use yaml - default is json")
+	flag.BoolVar(&useyaml, "yaml", true, "use yaml - default is yaml. false is json")
 }
 
 func main() {
@@ -119,10 +119,9 @@ func main() {
 		log.SetOutput(lf)
 	}
 
-	log.Print("** blockhosts-nft Copyright (C) 2025 Fred Posner")
+	log.Print("** blockhosts-nft Copyright (C) 2025, Fred Posner (pgpx.io)")
 	log.Print("** This program comes with ABSOLUTELY NO WARRANTY.")
-	log.Print("** This is free software, and you are welcome to redistribute it under certain conditions.")
-	log.Print("** Read full LICENSE at https://github.com/palner/blockhosts-nft/blob/main/LICENSE")
+	log.Print("** License: GPLv3 https://github.com/palner/blockhosts-nft")
 	log.Println("-> [o] Loading config")
 	bhconfig, err := LoadConfig()
 	if err != nil {

@@ -26,18 +26,10 @@ echo ""
 echo ""
 echo " need support? https://palner.com"
 echo ""
-echo "Copyright (c) 2024 Fred Posner"
-echo "Copyright (c) 2024 The Palner Group, Inc."
+echo "Copyright (c) 2026 Fred Posner"
+echo "Copyright (c) 2026 The Palner Group, Inc."
 echo ""
-echo "Permission is hereby granted, free of charge, to any person obtaining a copy"
-echo "of this software and associated documentation files (the "Software"), to deal"
-echo "in the Software without restriction, including without limitation the rights"
-echo "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell"
-echo "copies of the Software, and to permit persons to whom the Software is"
-echo "furnished to do so, subject to the following conditions:"
-echo ""
-echo "The above copyright notice and this permission notice shall be included in all"
-echo "copies or substantial portions of the Software."
+echo "GPLv3"
 echo ""
 echo "THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
 echo "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
@@ -74,7 +66,7 @@ chmod +x blockhosts-nft
 
 echo "[-] downloading default config"
 cd /usr/local/bin
-wget https://raw.githubusercontent.com/palner/blockhosts-nft/refs/heads/main/bhconfig.json &>/dev/null
+wget https://raw.githubusercontent.com/palner/blockhosts-nft/refs/heads/main/bhconfig.yaml &>/dev/null
 if [ "$?" -eq "0" ]
 then
   echo "[-] downloaded"
@@ -107,5 +99,5 @@ fi
 
 echo "[+] done."
 echo ""
-echo "PLEASE, please, update /usr/local/bin/bhconfig.json with your allowed ips."
+echo "PLEASE, please, update /usr/local/bin/bhconfig.yaml with your allowed ips."
 echo ""
