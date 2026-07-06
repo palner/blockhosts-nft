@@ -1,7 +1,7 @@
 /*
 
 blockhosts-nft: blocks attack detections via nftables
-Copyright (C) 2025 Fred Posner
+Copyright (C) 2025, 2026 Fred Posner (The Palner Group, Inc.)
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -65,7 +65,7 @@ type BHconfig struct {
 	Allowed      []IPNet
 	Blocked      []IPAddressesTime
 	Watching     []IPAddressesCountTime
-	sourceFile   string
+	SourceFile   string
 }
 
 type IPAddressesCount struct {
@@ -99,7 +99,7 @@ func init() {
 	flag.StringVar(&sshLog, "ssh", "/var/log/auth.log", "location of ssh log")
 	flag.BoolVar(&extraLog, "xtra", false, "log extra")
 	flag.BoolVar(&fullLog, "full", false, "read more than 5000 lines of the log")
-	flag.BoolVar(&useyaml, "yaml", false, "use yaml - default is json")
+	flag.BoolVar(&useyaml, "yaml", true, "use yaml - default is yaml. false is json")
 }
 
 func main() {
@@ -119,10 +119,9 @@ func main() {
 		log.SetOutput(lf)
 	}
 
-	log.Print("** blockhosts-nft Copyright (C) 2025 Fred Posner")
+	log.Print("** blockhosts-nft Copyright (C) 2026 Fred Posner (pgpx.io)")
 	log.Print("** This program comes with ABSOLUTELY NO WARRANTY.")
-	log.Print("** This is free software, and you are welcome to redistribute it under certain conditions.")
-	log.Print("** Read full LICENSE at https://github.com/palner/blockhosts-nft/blob/main/LICENSE")
+	log.Print("** License: GPLv3 https://github.com/palner/blockhosts-nft")
 	log.Println("-> [o] Loading config")
 	bhconfig, err := LoadConfig()
 	if err != nil {
@@ -173,7 +172,7 @@ func main() {
 		if bhc.Blocked == nil {
 			log.Println("no blocks listed in cfg either")
 		} else {
-			log.Println("sync cfg blocks to iptables")
+			log.Println("sync cfg blocks to nftables")
 			for _, v := range bhc.Blocked {
 				if !bhnft.BeenAWeek(v.TimeStamp) {
 					_ = nftlib.NftAddSetElement(setDetails, v.Ip)
@@ -215,7 +214,7 @@ func main() {
 			for _, v := range bhc.Blocked {
 				if bhnft.BeenAWeek(v.TimeStamp) {
 					if bhnft.Contains(blocked, v.Ip) {
-						log.Println("removing week old ip", v.Ip, "from iptables")
+						log.Println("removing week old ip", v.Ip, "from nftables")
 						_ = nftlib.NftDelSetElement(setDetails, v.Ip)
 					}
 				} else {
@@ -517,7 +516,7 @@ func LoadConfig() (*BHconfig, error) {
 			}
 		}
 
-		cfg.sourceFile = loc
+		cfg.SourceFile = loc
 		return cfg, nil
 	}
 
@@ -593,14 +592,7 @@ func GetElapsed(start time.Time) time.Duration {
 }
 
 func (cfg *BHconfig) Update() error {
-	f, err := os.Create(cfg.sourceFile)
-	if err != nil {
-		return fmt.Errorf("failed to open configuration file for writing: %w", err)
-	}
-
-	defer f.Close()
-
-	fileLock := flock.New(cfg.sourceFile)
+	fileLock := flock.New(cfg.SourceFile)
 	locked, err := fileLock.TryLock()
 
 	if err != nil {
@@ -608,6 +600,13 @@ func (cfg *BHconfig) Update() error {
 	}
 
 	if locked {
+		f, err := os.Create(cfg.SourceFile)
+		if err != nil {
+			return fmt.Errorf("failed to open configuration file for writing: %w", err)
+		}
+
+		defer f.Close()
+
 		sort.Slice(bhc.Blocked, func(i, j int) bool {
 			return bhc.Blocked[i].TimeStamp < bhc.Blocked[j].TimeStamp
 		})
@@ -617,7 +616,7 @@ func (cfg *BHconfig) Update() error {
 		})
 
 		if useyaml {
-			enc := yaml.NewEncoder(f)
+			enc := yaml.NewEncoder(f, yaml.Indent(2), yaml.IndentSequence(true))
 			enc.Encode(cfg)
 		} else {
 			enc := json.NewEncoder(f)
@@ -625,7 +624,7 @@ func (cfg *BHconfig) Update() error {
 			enc.Encode(cfg)
 		}
 	} else {
-		log.Println("[updateconfig] unable to update", cfg.sourceFile, "... aleady locked?")
+		log.Println("[updateconfig] unable to update", cfg.SourceFile, "... aleady locked?")
 	}
 
 	return nil

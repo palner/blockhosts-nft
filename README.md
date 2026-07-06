@@ -30,14 +30,26 @@ chmod +x blockhosts-nft
 
 ```
 cd /usr/local/bin
-wget https://raw.githubusercontent.com/palner/blockhosts-nft/refs/heads/main/bhconfig.json
+wget https://raw.githubusercontent.com/palner/blockhosts-nft/refs/heads/main/bhconfig.yaml
 ```
 
 #### Update the config
 
-There is a section (in `json`) called **Allowed**. Add your CIDRs as desired.
+There is a section called **Allowed**. Add your CIDRs as desired.
 
 Examples...
+
+```yaml
+allowed:
+- cidr: 192.168.0.0/16
+```
+
+```yaml
+allowed:
+- cidr: 192.168.0.0/16
+- cidr: 1.1.1.1/32
+- cidr: 10.1.1.0/24
+```
 
 ```json
 "Allowed": [{"cidr":"192.168.0.3/32"}]
@@ -86,8 +98,9 @@ sshd : ALL : allow
 - `ssh`: log file to parse
 - `set`: nftables set name (default is `APIBANLOCAL`) (Note: will be created if it doesn't exist)
 - `log`: log file for output (default is /var/log/blockhosts.log)
-- `xtra`: `true|false`. default false. Used for extra logging
-- `full`: `true|false`. default false. Read full log (vs 5000 line chunks)
+- `xtra`: `true|false`. default `false`. Used for extra logging
+- `full`: `true|false`. default `false`. Read full log (vs 5000 line chunks)
+- `yaml`: `true|false`. default `true`. Use YaML (default) or json for config
 
 Example:
 
@@ -95,16 +108,20 @@ Example:
 
 ## License / Warranty
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+License: GPLv3
 
-See LICENSE for more details
+Copyright: Fred Posner (The Palner Group)
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  
+SOFTWARE.
 
 ## Thanks
 
-Like it? Please star and consider a [sponsor](https://github.com/sponsors/palner)
+Like it? Please star and consider [sponsoring](https://github.com/sponsors/palner).
+
+Contributions and Issues are welcome!
