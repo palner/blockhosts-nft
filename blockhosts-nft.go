@@ -619,9 +619,36 @@ func (cfg *BHconfig) Update() error {
 			enc := yaml.NewEncoder(f, yaml.Indent(2), yaml.IndentSequence(true))
 			enc.Encode(cfg)
 		} else {
+			dst := cfg.SourceFile + ".lng"
+			destinationFile, err := os.Create(dst)
+			if err != nil {
+				log.Println("-> [x] [UpdateConfig] error creating backup file:", err)
+			}
+
+			defer destinationFile.Close()
+			_, err = io.Copy(destinationFile, f)
+			if err != nil {
+				log.Println("-> [x] [UpdateConfig] error creating backup file:", err)
+			}
+
 			enc := json.NewEncoder(f)
 			enc.SetIndent("", "\t")
 			enc.Encode(cfg)
+
+			validatecfg := new(BHconfig)
+			if err := yaml.NewDecoder(f).Decode(validatecfg); err != nil {
+				log.Println("-> [x] [UpdateConfig] error reading updated config:", err)
+				log.Println("-> [-] [UpdateConfig] restorning backup", dst)
+				_, err = io.Copy(f, destinationFile)
+				if err != nil {
+					log.Println("-> [x] [UpdateConfig] error restoring backup file:", err)
+				}
+			}
+
+			err = os.Remove(dst)
+			if err != nil {
+				log.Println("-> [x] [UpdateConfig] error deleting backup file:", err)
+			}
 		}
 	} else {
 		log.Println("[updateconfig] unable to update", cfg.SourceFile, "... aleady locked?")
